@@ -1,0 +1,36 @@
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Node
+node_modules/
+frontend/dist/
+frontend/coverage/
+
+# Environment
+.env
+.env.local
+
+# Generated data (regenerate with the crawler / analysis commands)
+data/raw/*
+!data/raw/.gitkeep
+data/cleaned/*
+!data/cleaned/.gitkeep
+data/results/*
+!data/results/.gitkeep
+data/import/*
+!data/import/.gitkeep
+report/figures/*
+!report/figures/.gitkeep
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.log

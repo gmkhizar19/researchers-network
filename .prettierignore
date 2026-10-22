@@ -1,0 +1,7 @@
+node_modules/
+frontend/dist/
+frontend/coverage/
+.venv/
+data/
+report/figures/
+package-lock.json

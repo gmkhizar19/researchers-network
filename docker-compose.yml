@@ -1,0 +1,35 @@
+name: researchers-network
+
+services:
+  neo4j:
+    image: neo4j:5.26-community
+    container_name: researchers-network-neo4j
+    ports:
+      - "7474:7474" # HTTP browser
+      - "7687:7687" # Bolt
+    environment:
+      NEO4J_AUTH: "neo4j/${NEO4J_PASSWORD:-researchers}"
+      # GDS is *not* bundled in the community image; this makes the container
+      # download and install it on first boot.
+      NEO4J_PLUGINS: '["graph-data-science"]'
+      NEO4J_dbms_security_procedures_unrestricted: "gds.*"
+      NEO4J_dbms_security_procedures_allowlist: "gds.*"
+      NEO4J_server_memory_heap_initial__size: "512M"
+      NEO4J_server_memory_heap_max__size: "1G"
+      NEO4J_server_memory_pagecache_size: "512M"
+    volumes:
+      - neo4j_data:/data
+      - ./data/import:/import
+    healthcheck:
+      # Compose substitutes the password here; the container itself only needs
+      # NEO4J_AUTH. (A separate NEO4J_PASSWORD variable is an invalid Neo4j
+      # setting and stops the server from starting.)
+      test: ["CMD-SHELL", 'cypher-shell -u neo4j -p "${NEO4J_PASSWORD:-researchers}" "RETURN 1" || exit 1']
+      interval: 10s
+      timeout: 10s
+      retries: 20
+      start_period: 40s
+    restart: unless-stopped
+
+volumes:
+  neo4j_data:
