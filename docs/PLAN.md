@@ -97,7 +97,7 @@ analysis graph) and wait for approval.
 - [x] Top-10 critical authors listed with real names, institutions and scores
       (`data/results/p1_critical_authors.csv`, 100 rows).
 - [x] Removing the top 1% by betweenness reduces LCC by a measured, reported amount;
-      random baseline is shown with mean and spread. (Top 1% ≈ 146 authors:
+      random baseline is shown with mean and spread. (Top 1% = 144 authors:
       LCC 92.6% → 91.55%; random baseline 91.59% ± 0.05 at the same removal count.
       The gap widens deeper into the cascade — at 10% removed: targeted 76.3%
       vs random 82.4% vs rewired null model 87.7%.)
