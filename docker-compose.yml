@@ -2,16 +2,18 @@ name: researchers-network
 
 services:
   neo4j:
-    image: neo4j:5.26-community
+    # Built from docker/neo4j.Dockerfile so GDS is baked into the image and is
+    # not downloaded again on every restart.
+    build:
+      context: .
+      dockerfile: docker/neo4j.Dockerfile
+    image: researchers-network-neo4j:5.26-gds
     container_name: researchers-network-neo4j
     ports:
       - "7474:7474" # HTTP browser
       - "7687:7687" # Bolt
     environment:
       NEO4J_AUTH: "neo4j/${NEO4J_PASSWORD:-researchers}"
-      # GDS is *not* bundled in the community image; this makes the container
-      # download and install it on first boot.
-      NEO4J_PLUGINS: '["graph-data-science"]'
       NEO4J_dbms_security_procedures_unrestricted: "gds.*"
       NEO4J_dbms_security_procedures_allowlist: "gds.*"
       NEO4J_server_memory_heap_initial__size: "512M"

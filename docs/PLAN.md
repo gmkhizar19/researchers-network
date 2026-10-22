@@ -24,8 +24,9 @@ does not need it.
 ### Stage 1 — Docker config, crawler, cleaning  → **GATE 1**
 
 **Build**
-1. Finalise `docker-compose.yml` (Neo4j 5.26 + GDS, healthcheck, `/import` mount)
-   and `.env.example` (`OPENALEX_EMAIL`, `NEO4J_URI`, `NEO4J_USER`,
+1. Finalise `docker-compose.yml` and `docker/neo4j.Dockerfile` (Neo4j 5.26 with
+   GDS 2.13.14 baked into the image, healthcheck, `/import` mount) and
+   `.env.example` (`OPENALEX_EMAIL`, `NEO4J_URI`, `NEO4J_USER`,
    `NEO4J_PASSWORD`, `CORS_ORIGINS`).
 2. `crawler/fetch_openalex.py`: cursor pagination, retries with exponential backoff,
    polite-pool headers, local JSONL cache so a rerun never re-downloads, progress log.

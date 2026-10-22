@@ -202,7 +202,9 @@ python -m crawler.cli status       # cache summary
 
 ## 1. What was built
 
-- Neo4j **5.26.32** running in Docker with the **Graph Data Science 2.13.14** plugin.
+- Neo4j **5.26.32** running in Docker with the **Graph Data Science 2.13.14**
+  plugin, baked into the local image by `docker/neo4j.Dockerfile` so restarts do
+  not re-download the 63 MB jar.
 - Four node labels (`Author`, `Paper`, `Institution`, `Topic`) and five relationship
   types (`WROTE`, `AFFILIATED_WITH`, `ABOUT`, `CITES`, `CO_AUTHORED`).
 - Uniqueness constraints on every node id, plus indexes for the properties used in
@@ -351,6 +353,7 @@ stage runs in Python.
 ## 8. Commands
 
 ```powershell
+docker compose build neo4j                # first time only (downloads GDS)
 docker compose up -d
 python -m analysis.load_neo4j --reset     # full load
 python -m analysis.load_neo4j --gds-only  # rebuild projections only

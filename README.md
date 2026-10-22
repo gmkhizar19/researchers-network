@@ -148,7 +148,9 @@ researchers-network/
   AGENTS.md                  project rules (read this first)
   README.md                  this file
   docker-compose.yml         Neo4j 5.26 + GDS
+  docker/neo4j.Dockerfile    bakes the exact GDS version into the image
   .env.example               environment template (copy to .env)
+  start.ps1                  daily launcher: Docker + API + UI
   pyproject.toml             Python package, dependencies, pytest/ruff config
   run_all.ps1 / run_all.sh   stage-selectable pipeline runner
   crawler/                   fetch_openalex.py, clean.py, build_graph.py, cli.py
@@ -222,6 +224,55 @@ cd frontend
 npm install        # or npm.cmd install on Windows
 cd ..
 ```
+
+---
+
+## Daily startup (after the first setup)
+
+Once `.env`, `.venv`, `frontend/node_modules` and the Docker image exist, you do
+**not** need to crawl or recompute anything. From the repository root:
+
+```powershell
+.\start.ps1
+```
+
+The script:
+
+1. starts Docker Desktop if its engine is not running,
+2. starts the Neo4j container and waits for it to become healthy,
+3. starts FastAPI on `http://127.0.0.1:8000` if it is not already running,
+4. starts the Vite dev server on `http://127.0.0.1:5173`, and
+5. opens the UI in your browser.
+
+It reuses servers that are already running, so it is safe to run twice.
+
+| Command | What it does |
+|---|---|
+| `.\start.ps1` | Start everything and open the browser |
+| `.\start.ps1 -NoBrowser` | Start everything without opening a browser |
+| `.\start.ps1 -RebuildGds` | Recreate GDS projections before starting (only needed to rerun analyses) |
+| `.\start.ps1 -Stop` | Stop the API, the dev server and Neo4j; data is kept |
+
+The first Docker start builds the local image `researchers-network-neo4j:5.26-gds`
+and downloads the ~63 MB GDS jar **once**. Later starts use the baked image and do
+not download it again. A cold start after a reboot typically takes 2–3 minutes
+for Neo4j plus a few seconds for the API and UI.
+
+Manual equivalent, if you prefer separate terminals:
+
+```powershell
+# terminal 1
+docker compose up -d
+
+# terminal 2
+.\.venv\Scripts\python.exe -m uvicorn backend.main:app --reload --port 8000
+
+# terminal 3
+cd frontend
+npm.cmd run dev
+```
+
+Then open <http://127.0.0.1:5173>.
 
 ---
 
@@ -452,8 +503,8 @@ researchers-network/
 | `npm.ps1 cannot be loaded` | PowerShell execution policy. Use `npm.cmd` or `Set-ExecutionPolicy -Scope Process RemoteSigned`. |
 | `npm install` exits 1 with an `allow-scripts` warning | npm 11 blocks dependency post-install scripts. The packages still install and Vite builds; use `npm.cmd`, or run `npm approve-scripts` if a package truly needs its script. `run_all` continues when `node_modules/vite` exists. |
 | `docker: command not found` | Start Docker Desktop; add `C:\Program Files\Docker\Docker\resources\bin` to PATH. `run_all` also checks the default install folders. |
-| Neo4j container is `starting` forever | First boot downloads GDS; wait 1–2 min. Check `docker compose logs neo4j`. |
-| `gds.version()` unknown procedure | GDS plugin did not install. Recreate the container with `docker compose down; docker compose up -d` (the volume is kept). |
+| Neo4j container is `starting` forever | First build downloads GDS and can take several minutes; later starts are faster. Check `docker compose logs neo4j`. |
+| `gds.version()` unknown procedure | Build the GDS image explicitly: `docker compose build neo4j`, then `docker compose up -d --force-recreate` (the data volume is kept). |
 | Neo4j auth failure | `.env` password must match `NEO4J_AUTH`. An existing volume keeps the old password; `docker compose down -v` deletes it (destructive), then reload. |
 | API returns 503 for `/api/network` | Neo4j is down or empty. `docker compose up -d`, then `python -m analysis.load_neo4j`. |
 | API returns 503 for analysis endpoints | The matching result file is missing. Run the analysis stage named in the error. |

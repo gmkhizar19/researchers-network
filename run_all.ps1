@@ -118,7 +118,7 @@ function Assert-Neo4jReachable {
     }
 }
 
-function Wait-ForNeo4j([int]$TimeoutSeconds = 180) {
+function Wait-ForNeo4j([int]$TimeoutSeconds = 600) {
     Write-Host "Waiting for the container healthcheck..." -ForegroundColor Yellow
     $deadline = (Get-Date).AddSeconds($TimeoutSeconds)
     while ((Get-Date) -lt $deadline) {

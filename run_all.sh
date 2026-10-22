@@ -131,7 +131,7 @@ assert_neo4j_reachable() {
 
 wait_for_neo4j() {
   echo "Waiting for the container healthcheck..."
-  local deadline=$((SECONDS + 180))
+  local deadline=$((SECONDS + 600))
   while [ $SECONDS -lt $deadline ]; do
     status="$("$DOCKER_BIN" inspect --format '{{.State.Health.Status}}' "$CONTAINER" 2>/dev/null || true)"
     if [ "$status" = "healthy" ]; then
@@ -140,7 +140,7 @@ wait_for_neo4j() {
     fi
     sleep 3
   done
-  echo "Neo4j did not become healthy within 180 seconds. Run: docker compose logs neo4j" >&2
+  echo "Neo4j did not become healthy within 600 seconds. Run: docker compose logs neo4j" >&2
   return 1
 }
 
